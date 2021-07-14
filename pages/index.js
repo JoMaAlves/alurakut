@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
-import Box from '../src/components/Box';
-import MainGrid from '../src/components/MainGrid';
-import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
+
+import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
+import DisplayCard from "../src/components/DisplayCard";
+import MainGrid from '../src/components/MainGrid';
+import Box from '../src/components/Box';
+
+const ICONS_SETUP = {
+  recados: 5,
+  fotos: 12,
+  videos: 2,
+  fas: 10,
+  mensagens: 20,
+  confiavel: 3,
+  legal: 3,
+  sexy: 2
+};
 
 function ProfileSidebar({ githubUser }) {
   return (
@@ -27,44 +40,29 @@ function ProfileSidebar({ githubUser }) {
 
 export default function Home() {
   const githubUser = 'JoMaAlves';
-  // const [followers, setFollowers] = useState([])
+  const [followers, setFollowers] = useState([])
   const [communities, setCommunities] = useState([{
     id: new Date().toISOString(),
     title: 'Eu odeio acordar cedo',
     image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
   }]);
-  const pessoasFavoritas = [
-    'juunegreiros',
-    'omariosouto',
-    'peas',
-    'rafaballerini',
-    'marcobrunodev',
-    'felipefialho'
-  ];
 
-  const iconsSetup = {
-    recados: 5,
-    fotos: 12,
-    videos: 2,
-    fas: 10,
-    mensagens: 20,
-    confiavel: 3,
-    legal: 3,
-    sexy: 2
-  };
-
-  // useEffect(() => {
-  //   fetch("https://api.github.com/users/JoMaalves/followers")
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       data.map((item) => 
-  //         setFollowers((prevItems) => [
-  //           ...prevItems,
-  //           item.login,
-  //         ])
-  //       );
-  //     });
-  // }, []);
+  useEffect(() => {
+    fetch("https://api.github.com/users/JoMaAlves/following")
+      .then((response) => response.json())
+      .then((data) => {
+        data.map((item) => 
+          setFollowers((prevItems) => [
+            ...prevItems,
+            {
+              title: item.login,
+              image: `https://github.com/${item.login}.png`,
+              id: item.id
+            },
+          ])
+        );
+      });
+  }, []);
 
   const handleCreateComunity = (event) => {
     event.preventDefault();
@@ -95,7 +93,7 @@ export default function Home() {
           <Box>
             <h1 className="title">Bem vindo(a)</h1>
 
-            <OrkutNostalgicIconSet {...iconsSetup}/>
+            <OrkutNostalgicIconSet {...ICONS_SETUP}/>
           </Box>
           
           <Box>
@@ -127,46 +125,9 @@ export default function Home() {
         </div>
 
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">
-              Pessoas da Comunidade ({pessoasFavoritas.length})
-            </h2>
-
-            <ul>
-              {
-                pessoasFavoritas.map((itemAtual) => {
-                  return (
-                    <li key={itemAtual}>
-                      <a href={`/users/${itemAtual}`}>
-                        <img src={`https://github.com/${itemAtual}.png`} />
-                        <span>{itemAtual}</span>
-                      </a>
-                    </li>
-                  );
-                })
-              }
-            </ul>
-          </ProfileRelationsBoxWrapper>
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">
-              Comunidades ({communities.length})
-            </h2>
-
-            <ul>
-              {
-                communities.map((itemAtual) => {
-                  return (
-                    <li key={itemAtual.id}>
-                      <a href={`/users/${itemAtual}`}>
-                        <img src={itemAtual.image} />
-                        <span>{itemAtual.title}</span>
-                      </a>
-                    </li>
-                  );
-                })
-              }
-            </ul>
-          </ProfileRelationsBoxWrapper>
+          <DisplayCard title="Meus amigos" displayItems={followers}/>
+          
+          <DisplayCard title="Minhas comunidades" displayItems={communities}/>
         </div>
       </MainGrid>
     </>
