@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
+import { AlurakutMenu, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
 
-import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
-import DisplayCard from "../src/components/DisplayCard";
-import MainGrid from '../src/components/MainGrid';
 import Box from '../src/components/Box';
+import MainGrid from '../src/components/MainGrid';
+import DisplayCard from "../src/components/DisplayCard";
+import ProfileSidebar from "../src/components/ProfileSidebar";
 
 const ICONS_SETUP = {
   recados: 5,
@@ -17,26 +17,14 @@ const ICONS_SETUP = {
   sexy: 2
 };
 
-function ProfileSidebar({ githubUser }) {
-  return (
-    <Box>
-      <img 
-        src={`https://github.com/${githubUser}.png`}
-        style={{ borderRadius: '8px' }}
-      />
-      <hr/>
-      
-      <p>
-        <a className="boxLink" href={`https://github.com/${githubUser}`}>
-          @{githubUser}
-        </a>
-      </p>
-      <hr/>
-
-      <AlurakutProfileSidebarMenuDefault />
-    </Box>
-  );
-}
+const PESSOAS_FAVORITAS = [
+  {title: 'juunegreiros', id: 'juunegreiros', image: 'https://github.com/juunegreiros.png' },
+  {title: 'omariosouto', id: 'omariosouto', image: 'https://github.com/omariosouto.png' },
+  {title: 'peas', id: 'peas', image: 'https://github.com/peas.png' },
+  {title: 'rafaballerini', id: 'rafaballerini', image: 'https://github.com/rafaballerini.png' },
+  {title: 'marcobrunodev', id: 'marcobrunodev', image: 'https://github.com/marcobrunodev.png' },
+  {title: 'felipefialho', id: 'felipefialho', image: 'https://github.com/felipefialho.png' }
+];
 
 export default function Home() {
   const githubUser = 'JoMaAlves';
@@ -48,28 +36,30 @@ export default function Home() {
   }]);
 
   useEffect(() => {
-    fetch("https://api.github.com/users/JoMaAlves/following")
-      .then((response) => response.json())
+    fetch("https://api.github.com/users/JoMaAlves/followers")
+      .then((response) => {
+        if(response.ok) {
+          return response.json();
+        }
+
+        throw new Error('Aconteceu algum problema: ' + response.status)
+      })
       .then((data) => {
-        data.map((item) => 
-          setFollowers((prevItems) => [
-            ...prevItems,
-            {
-              title: item.login,
-              image: `https://github.com/${item.login}.png`,
-              id: item.id
-            },
-          ])
-        );
-      });
+        setFollowers(data.map( item => { 
+          return {
+            id: item.id,
+            title: item.login,
+            image: `https://github.com/${item.login}.png`
+          };
+        }))
+      })
+      .catch((error) => console.error(error));
   }, []);
 
   const handleCreateComunity = (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.target);
-    
-
 
     setCommunities([
       ...communities,
@@ -125,7 +115,9 @@ export default function Home() {
         </div>
 
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
-          <DisplayCard title="Meus amigos" displayItems={followers}/>
+          <DisplayCard title="Pessoas da Comunidade" displayItems={PESSOAS_FAVORITAS}/>
+          
+          <DisplayCard title="Meus Seguidores" displayItems={followers}/>
           
           <DisplayCard title="Minhas comunidades" displayItems={communities}/>
         </div>

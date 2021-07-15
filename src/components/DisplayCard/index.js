@@ -3,12 +3,12 @@ import { ProfileRelationsBoxWrapper } from '../ProfileRelations';
 
 const DisplayCard = ({ title, displayItems }) => {
   const [showAll, setShowAll] = useState(false)
-  const link = title === "Meus amigos" ? "users" : "community";
+  const link = title === "Minhas comunidades" ? "community" : "users";
 
-  const displayable = showAll ? displayItems : displayItems.slice(7,13);
+  const displayable = showAll ? displayItems : displayItems.slice(0,6);
 
   const handleShowAll = () => {
-    setShowAll(true)
+    showAll ? setShowAll(false) : setShowAll(true);
   };
 
   return (
