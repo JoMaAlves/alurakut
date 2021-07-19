@@ -1,3 +1,5 @@
+import nookies from 'nookies';
+import jwt from 'jsonwebtoken';
 import { useEffect, useState } from "react";
 import { AlurakutMenu, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
 
@@ -5,6 +7,7 @@ import Box from '../src/components/Box';
 import MainGrid from '../src/components/MainGrid';
 import DisplayCard from "../src/components/DisplayCard";
 import ProfileSidebar from "../src/components/ProfileSidebar";
+import { is } from 'bluebird';
 
 const ICONS_SETUP = {
   recados: 5,
@@ -26,13 +29,13 @@ const PESSOAS_FAVORITAS = [
   {title: 'felipefialho', id: 'felipefialho', image: 'https://github.com/felipefialho.png' }
 ];
 
-export default function Home() {
-  const githubUser = 'JoMaAlves';
+export default function Home(props) {
+  const githubUser = props.githubUser;
   const [followers, setFollowers] = useState([])
   const [communities, setCommunities] = useState([]);
 
   useEffect(() => {
-    fetch("https://api.github.com/users/JoMaAlves/followers")
+    fetch(`https://api.github.com/users/${githubUser}/followers`)
       .then((response) => {
         if(response.ok) {
           return response.json();
@@ -155,4 +158,32 @@ export default function Home() {
       </MainGrid>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+
+  const cookies = nookies.get(context)
+  const token = cookies.USER_TOKEN
+
+  const { isAuthenticated } = await fetch("http://localhost:3000/api/auth", {
+    headers: {
+      Authorization: token,
+    },
+  })
+  .then((resposta) => resposta.json())
+
+  if(!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      }
+    }
+  }
+  
+  return {
+    props: {
+      githubUser: jwt.decode(token).githubUser
+    }
+  }
 }
