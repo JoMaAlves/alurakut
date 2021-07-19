@@ -29,11 +29,7 @@ const PESSOAS_FAVORITAS = [
 export default function Home() {
   const githubUser = 'JoMaAlves';
   const [followers, setFollowers] = useState([])
-  const [communities, setCommunities] = useState([{
-    id: new Date().toISOString(),
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }]);
+  const [communities, setCommunities] = useState([]);
 
   useEffect(() => {
     fetch("https://api.github.com/users/JoMaAlves/followers")
@@ -54,6 +50,31 @@ export default function Home() {
         }))
       })
       .catch((error) => console.error(error));
+    
+    //API GraphQL
+    fetch("https://graphql.datocms.com/", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': "547feffa6c21802b9a3c008ff8d2df",
+      },
+      body: JSON.stringify({
+        query: `query {
+          allCommunities {
+            id
+            title
+            image
+            creatorSlug
+          }
+        }` }),
+    })
+    .then(response => response.json())
+    .then(response => {
+      const comunidades = response.data.allCommunities;
+      setCommunities(comunidades);
+    })
+
   }, []);
 
   const handleCreateComunity = (event) => {
@@ -61,14 +82,24 @@ export default function Home() {
 
     const formData = new FormData(event.target);
 
-    setCommunities([
-      ...communities,
-      {
-        id: new Date().toISOString(),
+    const newCommunity = {
         title: formData.get('title'),
         image: formData.get('image'),
-      }
-    ]);
+        creatorSlug: githubUser
+      };
+
+    fetch('/api/comunidades', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newCommunity)
+    })
+    .then(async (response) => {
+      const dados = await response.json();
+      setCommunities([newCommunity, ...communities])
+    })
+
   }
   
   return (

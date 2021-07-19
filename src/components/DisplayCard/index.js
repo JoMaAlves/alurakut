@@ -3,7 +3,11 @@ import { ProfileRelationsBoxWrapper } from '../ProfileRelations';
 
 const DisplayCard = ({ title, displayItems }) => {
   const [showAll, setShowAll] = useState(false)
-  const link = title === "Minhas comunidades" ? "community" : "users";
+
+  let link = "users";
+
+  if (title === "Minhas comunidades") link = "communities";
+  else link = "followers"
 
   const displayable = showAll ? displayItems : displayItems.slice(0,6);
 
@@ -23,8 +27,7 @@ const DisplayCard = ({ title, displayItems }) => {
             return (
               <li key={item.id}>
                 <a 
-                  href={ link === 'users' ? `https://github.com/${item.title}` : 'https://github.com/jomaalves'}
-                  target="_blank"
+                  href={ `/${link}/${item.id}` }
                 >
                   <img src={item.image} />
                   <span>{item.title}</span>
